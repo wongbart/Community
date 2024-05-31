@@ -7,3 +7,10 @@ You can run this example directly in your browser on:
 - [CodeSandbox](https://codesandbox.io/p/sandbox/github/socketio/chat-example?file=index.js)
 - [StackBlitz](https://stackblitz.com/github/socketio/chat-example?file=index.js)
 - [Repl.it](https://repl.it/github/socketio/chat-example)
+
+To do: 
+Add nicknames
+Add favicon
+Add other websites or let you chose video somehow
+Add floating emojis
+Default profile pics
