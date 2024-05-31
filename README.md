@@ -9,8 +9,8 @@ You can run this example directly in your browser on:
 - [Repl.it](https://repl.it/github/socketio/chat-example)
 
 To do: 
-Add nicknames
-Add favicon
-Add other websites or let you chose video somehow
-Add floating emojis
-Default profile pics
+Add nicknames, 
+Add favicon, 
+Add other websites or let you chose video somehow, 
+Add floating emojis, 
+Default profile pics, 
