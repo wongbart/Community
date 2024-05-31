@@ -89,6 +89,7 @@
       flex-grow: 1;
       padding: 1rem;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       background-color: #e0e0e0;
@@ -101,11 +102,12 @@
       <!-- YouTube Embedded Player -->
       <iframe class="video-iframe" src="https://www.youtube.com/embed/RubBzkZzpUA?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
-  </div>
-  <div class="chat-container">
-    <ul id="chatMessages"></ul>
-    <input type="text" id="chatInput" placeholder="Type your message...">
-    <button id="sendButton">Send</button>
+    <div class="chat-container">
+      <ul id="messages"></ul>
+      <form id="form" action="">
+        <input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button>
+      </form>
+    </div>
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script>
