@@ -41,7 +41,6 @@ if (cluster.isPrimary) {
     // Enable compression
     perMessageDeflate: {
       zlibDeflateOptions: {
-        // See zlib defaults.
         chunkSize: 1024,
         memLevel: 7,
         level: 3
@@ -64,10 +63,12 @@ if (cluster.isPrimary) {
     });
 
     socket.on('chat message', async (msg, clientOffset, callback) => {
+      console.time('db-insert');
       let result;
       try {
         result = await db.run('INSERT INTO messages (content, client_offset, nickname) VALUES (?, ?, ?)', msg, clientOffset, socket.nickname || 'Anonymous');
       } catch (e) {
+        console.timeEnd('db-insert');
         if (e.errno === 19 /* SQLITE_CONSTRAINT */) {
           callback();
         } else {
@@ -75,7 +76,12 @@ if (cluster.isPrimary) {
         }
         return;
       }
+      console.timeEnd('db-insert');
+
+      console.time('emit-message');
       io.emit('chat message', { message: msg, nickname: socket.nickname || 'Anonymous' }, result.lastID);
+      console.timeEnd('emit-message');
+      
       callback();
     });
 
