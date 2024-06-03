@@ -31,6 +31,8 @@ if (cluster.isPrimary) {
       content TEXT,
       nickname TEXT
     );
+
+    CREATE INDEX IF NOT EXISTS idx_client_offset ON messages (client_offset);
   `);
 
   const app = express();
