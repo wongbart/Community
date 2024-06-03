@@ -47,7 +47,6 @@ if (cluster.isPrimary) {
   });
 
   io.on('connection', async (socket) => {
-    // Store the nickname for each socket
     socket.on('set nickname', (nickname) => {
       socket.nickname = nickname;
     });
@@ -60,7 +59,7 @@ if (cluster.isPrimary) {
         if (e.errno === 19 /* SQLITE_CONSTRAINT */) {
           callback();
         } else {
-          // nothing to do, just let the client retry
+          // let the client retry
         }
         return;
       }
@@ -70,14 +69,12 @@ if (cluster.isPrimary) {
 
     if (!socket.recovered) {
       try {
-        await db.each('SELECT id, content, nickname FROM messages WHERE id > ?',
-          [socket.handshake.auth.serverOffset || 0],
-          (_err, row) => {
-            socket.emit('chat message', { message: row.content, nickname: row.nickname }, row.id);
-          }
-        );
+        const rows = await db.all('SELECT id, content, nickname FROM messages WHERE id > ?', [socket.handshake.auth.serverOffset || 0]);
+        rows.forEach(row => {
+          socket.emit('chat message', { message: row.content, nickname: row.nickname }, row.id);
+        });
       } catch (e) {
-        // something went wrong
+        // handle error
       }
     }
   });
