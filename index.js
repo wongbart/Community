@@ -37,7 +37,19 @@ if (cluster.isPrimary) {
   const server = createServer(app);
   const io = new Server(server, {
     connectionStateRecovery: {},
-    adapter: createAdapter()
+    adapter: createAdapter(),
+    // Enable compression
+    perMessageDeflate: {
+      zlibDeflateOptions: {
+        // See zlib defaults.
+        chunkSize: 1024,
+        memLevel: 7,
+        level: 3
+      },
+      zlibInflateOptions: {
+        chunkSize: 10 * 1024
+      }
+    }
   });
 
   const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -70,9 +82,8 @@ if (cluster.isPrimary) {
     if (!socket.recovered) {
       try {
         const rows = await db.all('SELECT id, content, nickname FROM messages WHERE id > ?', [socket.handshake.auth.serverOffset || 0]);
-        rows.forEach(row => {
-          socket.emit('chat message', { message: row.content, nickname: row.nickname }, row.id);
-        });
+        const messages = rows.map(row => ({ message: row.content, nickname: row.nickname, id: row.id }));
+        socket.emit('batch chat messages', messages);
       } catch (e) {
         // handle error
       }
