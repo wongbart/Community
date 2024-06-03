@@ -130,8 +130,11 @@
         socket.emit('set nickname', nicknameInput.value);
       }
       if (input.value) {
+        console.time('send-to-receive');
         const clientOffset = `${socket.id}-${counter++}`;
-        socket.emit('chat message', input.value, clientOffset);
+        socket.emit('chat message', input.value, clientOffset, () => {
+          console.timeEnd('send-to-receive');
+        });
         input.value = '';
       }
     });
