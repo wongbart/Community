@@ -136,6 +136,17 @@
       }
     });
 
+    socket.on('batch chat messages', (messagesBatch) => {
+      const fragment = document.createDocumentFragment();
+      messagesBatch.forEach(data => {
+        const item = document.createElement('li');
+        item.textContent = `${data.nickname || 'Anonymous'}: ${data.message}`;
+        fragment.appendChild(item);
+      });
+      messages.appendChild(fragment);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+
     socket.on('chat message', (data, serverOffset) => {
       const item = document.createElement('li');
       item.textContent = `${data.nickname || 'Anonymous'}: ${data.message}`;
