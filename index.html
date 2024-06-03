@@ -91,6 +91,14 @@
       flex-grow: 1;
       display: flex;
     }
+
+    #nickname {
+      flex-grow: 1;
+      padding: 0.5rem 1rem;
+      /*border: 1px solid #ccc;*/
+      border-radius: 4px;
+      margin-right: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -102,6 +110,7 @@
     <div class="chat-container">
       <ul id="messages"></ul>
       <form id="form" action="">
+        <input id="nickname" autocomplete="off" placeholder="Enter nickname" />
         <input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button>
       </form>
     </div>
@@ -120,10 +129,14 @@
 
     const form = document.getElementById('form');
     const input = document.getElementById('input');
+    const nicknameInput = document.getElementById('nickname');
     const messages = document.getElementById('messages');
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (nicknameInput.value) {
+        socket.emit('set nickname', nicknameInput.value);
+      }
       if (input.value) {
         const clientOffset = `${socket.id}-${counter++}`;
         socket.emit('chat message', input.value, clientOffset);
@@ -131,9 +144,9 @@
       }
     });
 
-    socket.on('chat message', (msg, serverOffset) => {
+    socket.on('chat message', (data, serverOffset) => {
       const item = document.createElement('li');
-      item.textContent = msg;
+      item.textContent = `${data.nickname || 'Anonymous'}: ${data.message}`;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
       socket.auth.serverOffset = serverOffset;
