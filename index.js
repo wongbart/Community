@@ -28,7 +28,8 @@ if (cluster.isPrimary) {
     CREATE TABLE IF NOT EXISTS messages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       client_offset TEXT UNIQUE,
-      content TEXT
+      content TEXT,
+      nickname TEXT
     );
   `);
 
@@ -46,30 +47,35 @@ if (cluster.isPrimary) {
   });
 
   io.on('connection', async (socket) => {
+    // Store the nickname for each socket
+    socket.on('set nickname', (nickname) => {
+      socket.nickname = nickname;
+    });
+
     socket.on('chat message', async (msg, clientOffset, callback) => {
       let result;
       try {
-        result = await db.run('INSERT INTO messages (content, client_offset) VALUES (?, ?)', msg, clientOffset);
+        result = await db.run('INSERT INTO messages (content, client_offset, nickname) VALUES (?, ?, ?)', msg, clientOffset, socket.nickname || 'Anonymous');
       } catch (e) {
-        if (e.errno === 19 /* SQLITE_CONSTRAINT */ ) {
+        if (e.errno === 19 /* SQLITE_CONSTRAINT */) {
           callback();
         } else {
           // nothing to do, just let the client retry
         }
         return;
       }
-      io.emit('chat message', msg, result.lastID);
+      io.emit('chat message', { message: msg, nickname: socket.nickname || 'Anonymous' }, result.lastID);
       callback();
     });
 
     if (!socket.recovered) {
       try {
-        await db.each('SELECT id, content FROM messages WHERE id > ?',
+        await db.each('SELECT id, content, nickname FROM messages WHERE id > ?',
           [socket.handshake.auth.serverOffset || 0],
           (_err, row) => {
-            socket.emit('chat message', row.content, row.id);
+            socket.emit('chat message', { message: row.content, nickname: row.nickname }, row.id);
           }
-        )
+        );
       } catch (e) {
         // something went wrong
       }
